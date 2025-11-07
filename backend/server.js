@@ -52,14 +52,20 @@ app.get('/comments/new', (req, res) => {
 
 // API Routes
 app.post('/api/register', (req, res) => {
-    const { username, password} = req.body;
+    const { username, email, password } = req.body;
 
+    // Check if user already exists
     if (users[username]) {
-        return res.status(400).json({ error: 'User already exists' }).redirect('/register');
+        return res.render('register', { 
+            error: 'Username already exists. Please choose a different username.',
+            username: username,
+            email: email
+        });
     }
 
     users[username] = {
         username: username,
+        email: email,
         password: password
     };
     
@@ -72,6 +78,7 @@ app.post('/api/register', (req, res) => {
     });
 
     res.redirect('/comments');
+    console.log(`Registered user: ${username}`);
 });
 
 app.post('/api/login', (req, res) => {
@@ -79,7 +86,11 @@ app.post('/api/login', (req, res) => {
 
     const user = users[username];
     if (!user || user.password !== password) {
-        return res.status(401).json({ error: 'Invalid username or password' });
+        // Render login page with error message instead of JSON response
+        return res.render('login', { 
+            error: 'Invalid username or password. Please try again.',
+            username: username // Preserve the username they entered
+        });
     }
 
     // Set session cookie with proper options
@@ -91,6 +102,7 @@ app.post('/api/login', (req, res) => {
     });
 
     res.redirect('/comments');
+    console.log(`User logged in: ${username}`);
 });
 
 app.post('/api/logout', (req, res) => {
