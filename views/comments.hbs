@@ -50,47 +50,17 @@
     <section class="comments-list" aria-labelledby="comments-heading">
       <h2 id="comments-heading" style="margin:0 0 1rem 0; font-size:1.1rem; color:#4a5568;">Recent Discussions</h2>
 
-      <!-- Example comments using the comment partial -->
-      {{> comment 
-        avatarInitials="AL" 
-        author="Alice L." 
-        date="November 6, 2025 at 2:30 PM" 
-        content="I really appreciate the clean architecture of this project. The separation between frontend and backend services is well thought out, and the Docker setup makes deployment straightforward. Looking forward to seeing how authentication gets implemented!" 
-        likes="5"
-      }}
-
-      {{> comment 
-        avatarInitials="BM" 
-        author="Bob M." 
-        date="November 5, 2025 at 4:15 PM" 
-        content="The nginx configuration for serving static files while proxying API requests is a great pattern. This is exactly the kind of real-world setup we should be learning in server-side programming courses." 
-        likes="3"
-      }}
-
-      {{> comment 
-        avatarInitials="CP" 
-        author="Casey P." 
-        date="November 4, 2025 at 10:45 AM" 
-        content="Quick question about the handlebars templates - are you planning to add any client-side JavaScript for dynamic interactions, or keeping it server-rendered? Both approaches have their merits for a project like this." 
-        likes="2"
-      }}
-
-      {{> comment 
-        avatarInitials="DK" 
-        author="Dana K." 
-        date="November 3, 2025 at 7:20 PM" 
-        content="Love the attention to detail in the UI design. The consistent color scheme and typography make the whole application feel professional. The responsive layout works great on mobile too!" 
-        likes="7"
-      }}
-
-      <!-- Empty state (commented out since we have example comments) -->
-      <!--
-      <div class="empty-state">
-        <h3>No comments yet</h3>
-        <p>Be the first to start a discussion!</p>
-        <a href="/comments/new" class="btn btn-primary">Add the first comment</a>
-      </div>
-      -->
+      {{#if comments.length}}
+        {{#each comments}}
+          {{> comment}}
+        {{/each}}
+      {{else}}
+        <div class="empty-state">
+          <h3>No comments yet</h3>
+          <p>Be the first to share your thoughts! <br/>
+          <a href="/comments/new" class="btn btn-primary" style="margin-top:1rem; display:inline-block;">Add a New Comment</a></p>
+        </div>
+      {{/if}}
     </section>
 
     <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #e2e8f0; text-align:center; color:#718096; font-size:0.9rem;">

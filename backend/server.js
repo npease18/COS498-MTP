@@ -27,6 +27,7 @@ var sessions = {};
 // Apply authentication middleware to all routes
 app.use(requireAuth);
 app.use(addUserToContext);
+app.use(sendCommentsToCommentPage);
 
 // Page Routes
 app.get('/', (req, res) => {
@@ -70,8 +71,7 @@ app.post('/api/register', (req, res) => {
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
-    res.redirect('/');
-    console.log(`Registered user: ${username}`);
+    res.redirect('/comments');
 });
 
 app.post('/api/login', (req, res) => {
@@ -91,7 +91,6 @@ app.post('/api/login', (req, res) => {
     });
 
     res.redirect('/comments');
-    console.log(`User logged in: ${username}`);
 });
 
 app.post('/api/logout', (req, res) => {
@@ -100,9 +99,6 @@ app.post('/api/logout', (req, res) => {
     if (sessionId && sessions[sessionId]) {
         const username = sessions[sessionId].username;
         delete sessions[sessionId];
-        console.log(`User logged out: ${username} (session: ${sessionId})`);
-    } else {
-        console.log(`Logout attempt with invalid/missing session: ${sessionId}`);
     }
     
     // Clear the session cookie
@@ -113,6 +109,27 @@ app.post('/api/logout', (req, res) => {
     });
     
     res.redirect('/');
+});
+
+app.post('/api/comments', (req, res) => {
+    const sessionId = req.cookies.session;
+    const userSession = sessions[sessionId];
+
+    if (!userSession) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { content } = req.body;
+    const comment = {
+        id: comments.length + 1,
+        username: userSession.username,
+        avatarInitials: userSession.username.charAt(0).toUpperCase(),
+        content: content,
+        createdAt: new Date(),
+    };
+    comments.push(comment);
+    comments.sort((a, b) => b.createdAt - a.createdAt); // Newest first
+    res.redirect('/comments');
 });
 
 // Start server
@@ -164,4 +181,14 @@ function requireAuth(req, res, next) {
     } else {
         res.redirect('/login');
     }
+}
+
+function sendCommentsToCommentPage(req, res, next) {
+    if (req.path !== '/comments') {
+        next();
+        return;
+    }
+
+    res.locals.comments = comments;
+    next();
 }
